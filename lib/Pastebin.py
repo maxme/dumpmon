@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 from . import helper
 from time import sleep
 from settings import SLEEP_PASTEBIN
-from twitter import TwitterError
 import logging
 
 
@@ -42,5 +41,6 @@ class Pastebin(Site):
         for entry in new_pastes[::-1]:
             logging.info('Adding URL: ' + entry.url)
             self.put(entry)
+
     def get_paste_text(self, paste):
         return helper.download(paste.url)

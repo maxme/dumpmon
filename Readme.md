@@ -23,6 +23,9 @@ and set the following values in settings to the appropriate values:
 
 If you do not want DB support, set USE_DB to False.
 
+## Setting up Twitter support
+If you do not want Twitter support, set USE_TWITTER to False.
+
 ## Executing dumpmon
 
 	python dumpmon.py

@@ -14,10 +14,22 @@ from lib.Slexy import Slexy, SlexyPaste
 from lib.Pastie import Pastie, PastiePaste
 from lib.helper import log
 from time import sleep
-from twitter import Twitter, OAuth
-from settings import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET, log_file
+from settings import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET, \
+    log_file, USE_TWITTER
+if USE_TWITTER:
+    from twitter import Twitter, OAuth
+
 import threading
 import logging
+
+
+class StatusesMock():
+    def update(self, *args, **kwargs):
+        pass
+
+
+class TwitterMock():
+    statuses = StatusesMock()
 
 
 def monitor():
@@ -36,10 +48,12 @@ def monitor():
     logging.basicConfig(
         format='%(asctime)s [%(levelname)s] %(message)s', filename=log_file, level=level)
     logging.info('Monitoring...')
-    bot = Twitter(
-        auth=OAuth(ACCESS_TOKEN, ACCESS_TOKEN_SECRET,
-            CONSUMER_KEY, CONSUMER_SECRET)
-        )
+    if USE_TWITTER:
+        bot = Twitter(
+            auth=OAuth(ACCESS_TOKEN, ACCESS_TOKEN_SECRET,
+                       CONSUMER_KEY, CONSUMER_SECRET))
+    else:
+        bot = TwitterMock()
     # Create lock for both output log and tweet action
     log_lock = threading.Lock()
     tweet_lock = threading.Lock()

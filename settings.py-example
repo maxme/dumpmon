@@ -5,6 +5,7 @@ DB_HOST = 'localhost'
 DB_PORT = 27017
 
 # Twitter Settings
+USE_TWITTER = True
 CONSUMER_KEY = 'your_consumer_key'
 CONSUMER_SECRET = 'your_consumer_secret'
 ACCESS_TOKEN = 'your_access_token'
