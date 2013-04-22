@@ -6,7 +6,7 @@ class Paste(object):
         self.matches = {}
 
     def match(self):
-        for name, regex in matching_re.iteritems():
+        for name, regex in matching_re.items():
             matched = regex.findall(self.text)
             if matched:
                 self.matches[name] = matched
