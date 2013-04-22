@@ -2,74 +2,45 @@
 # Author: Jordan Wright
 # Version: 0.0 (in dev)
 
-# ---------------------------------------------------
-# To Do:
-#
-#	- Refine Regex
-#	- Create/Keep track of statistics
-
-from lib.regexes import regexes
 from lib.Pastebin import Pastebin, PastebinPaste
 from lib.Slexy import Slexy, SlexyPaste
 from lib.Pastie import Pastie, PastiePaste
-from lib.helper import log
+from settings import USE_DB, DB_HOST, DB_PORT
+from pymongo import MongoClient
 from time import sleep
-from settings import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET, \
-    log_file, USE_TWITTER
-if USE_TWITTER:
-    from twitter import Twitter, OAuth
-
 import threading
 import logging
+import argparse
 
-
-class StatusesMock():
-    def update(self, *args, **kwargs):
-        pass
-
-
-class TwitterMock():
-    statuses = StatusesMock()
-
+def setup():
+    if USE_DB:
+        db_client = MongoClient(DB_HOST, DB_PORT).paste_db
+        db_client.pastes.create_index("url", unique=True, dropDups=True)
+        db_client.urls.create_index("url", unique=True, dropDups=True)
 
 def monitor():
-    '''
-    monitor() - Main function... creates and starts threads
-
-    '''
-    import argparse
+    setup()
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-v", "--verbose", help="more verbose", action="store_true")
+    parser.add_argument("-v", "--verbose", help="more verbose", action="store_true")
     args = parser.parse_args()
     level = logging.INFO
     if args.verbose:
         level = logging.DEBUG
     logging.basicConfig(
-        format='%(asctime)s [%(levelname)s] %(message)s', filename=log_file, level=level)
+        format='%(asctime)s [%(levelname)s] %(message)s',  level=level)
     logging.info('Monitoring...')
-    if USE_TWITTER:
-        bot = Twitter(
-            auth=OAuth(ACCESS_TOKEN, ACCESS_TOKEN_SECRET,
-                       CONSUMER_KEY, CONSUMER_SECRET))
-    else:
-        bot = TwitterMock()
-    # Create lock for both output log and tweet action
+
     log_lock = threading.Lock()
     tweet_lock = threading.Lock()
 
-    pastebin_thread = threading.Thread(
-        target=Pastebin().monitor, args=[bot, tweet_lock])
-    slexy_thread = threading.Thread(
-        target=Slexy().monitor, args=[bot, tweet_lock])
-    pastie_thead = threading.Thread(
-        target=Pastie().monitor, args=[bot, tweet_lock])
+    pastebin_thread = threading.Thread(target=Pastebin().monitor, args=[tweet_lock])
+    slexy_thread = threading.Thread(target=Slexy().monitor, args=[tweet_lock])
+    pastie_thead = threading.Thread(target=Pastie().monitor, args=[tweet_lock])
 
     for thread in (pastebin_thread, slexy_thread, pastie_thead):
         thread.daemon = True
         thread.start()
 
-    # Let threads run
     try:
         while(1):
             sleep(5)

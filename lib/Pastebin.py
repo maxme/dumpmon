@@ -25,7 +25,6 @@ class Pastebin(Site):
         super(Pastebin, self).__init__()
 
     def update(self):
-        '''update(self) - Fill Queue with new Pastebin IDs'''
         logging.info('Retrieving Pastebin ID\'s')
         results = BeautifulSoup(helper.download(self.BASE_URL + '/archive')).find_all(
             lambda tag: tag.name == 'td' and tag.a and '/archive/' not in tag.a['href'] and tag.a['href'][1:])
@@ -39,8 +38,7 @@ class Pastebin(Site):
                 break
             new_pastes.append(paste)
         for entry in new_pastes[::-1]:
-            logging.info('Adding URL: ' + entry.url)
-            self.put(entry)
+            self.append(entry)
 
     def get_paste_text(self, paste):
         return helper.download(paste.url)

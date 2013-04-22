@@ -25,7 +25,6 @@ class Pastie(Site):
         super(Pastie, self).__init__()
 
     def update(self):
-        '''update(self) - Fill Queue with new Pastie IDs'''
         logging.info('Retrieving Pastie ID\'s')
         results = [tag for tag in BeautifulSoup(helper.download(
             self.BASE_URL + '/pastes')).find_all('p', 'link') if tag.a]
@@ -40,8 +39,7 @@ class Pastie(Site):
                 break
             new_pastes.append(paste)
         for entry in new_pastes[::-1]:
-            logging.debug('Adding URL: ' + entry.url)
-            self.put(entry)
+            self.append(entry)
 
     def get_paste_text(self, paste):
         return BeautifulSoup(helper.download(paste.url)).pre.text
